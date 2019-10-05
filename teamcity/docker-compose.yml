@@ -1,0 +1,30 @@
+version: "3.7"
+
+services:
+  postgres:
+    image: postgres:12
+    volumes:
+      - vol-postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+  teamcity-server:
+    image: jetbrains/teamcity-server:latest
+    depends_on:
+      - postgres
+    volumes:
+      - vol-tc-data:/data/teamcity_server/datadir
+      - vol-tc-logs:/opt/teamcity/logs
+    ports:
+      - "8111:8111"
+  teamcity-agent:
+    image: jetbrains/teamcity-agent
+    depends_on:
+      - teamcity-server
+    environment:
+      - SERVER_URL=http://teamcity-server:8111
+      - AGENT_NAME=regular_agent
+
+volumes:
+  vol-tc-data:
+  vol-tc-logs:
+  vol-postgres-data:
